@@ -14,7 +14,6 @@ def train(model: torch.nn.Module,
           train_loader: torch.utils.data.DataLoader,
           val_loader: torch.utils.data.DataLoader,
           epochs: int,
-          device: str,
           lr_scheduler: Optional[torch.optim.lr_scheduler._LRScheduler],
           filename: str,
           accumulate_every_n_epochs: int = 1) -> List[Any]:
@@ -29,7 +28,6 @@ def train(model: torch.nn.Module,
     train_loader (torch.utils.data.DataLoader): pytorch data loading iterable over the training dataset
     val_loader (torch.utils.data.DataLoader): pytorch data loading iterable over the validation dataset
     epochs (int): total number of epochs
-    device (str): the device on which the tensors will be allocated
     lr_scheduler (torch.optim.lr_scheduler._LRScheduler): learning rate scheduler
     filename (str): string containing the filename to save the model and optimizer states to a disk file
     accumulate_every_n_epochs (int): epochs to accumulate gradient before updating the weights
@@ -39,7 +37,7 @@ def train(model: torch.nn.Module,
     history (List[EpochStats]): training history
     """
 
-    model.to(device)
+    model.to('cuda')
     scaler = torch.cuda.amp.GradScaler()
     EpochStats = namedtuple('EpochStats', 'epoch learning_rate train_loss val_loss val_jac time')
     history = []
@@ -63,7 +61,7 @@ def train(model: torch.nn.Module,
 
             for batch_n, batch_data in enumerate(train_loader):
                 train_batch, labels_batch = batch_data['image'], batch_data['mask']
-                train_batch, labels_batch = train_batch.to(device), labels_batch.to(device)
+                train_batch, labels_batch = train_batch.to('cuda'), labels_batch.to('cuda')
 
                 with torch.autocast(device_type='cuda'):
                     output_batch = model(train_batch)
@@ -89,7 +87,7 @@ def train(model: torch.nn.Module,
         with torch.no_grad():
             for batch_data in val_loader:
                 val_batch, val_labels_batch = batch_data['image'], batch_data['mask']
-                val_batch, val_labels_batch = val_batch.to(device), val_labels_batch.to(device)
+                val_batch, val_labels_batch = val_batch.to('cuda'), val_labels_batch.to('cuda')
 
                 val_output_batch = model(val_batch)
                 val_loss = criterion(val_output_batch, val_labels_batch)

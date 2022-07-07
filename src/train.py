@@ -36,8 +36,8 @@ def train(model: torch.nn.Module,
     -------
     history (List[EpochStats]): training history
     """
-
-    model.to('cuda')
+    device = torch.device('cuda')
+    model.to(device)
     scaler = torch.cuda.amp.GradScaler()
     EpochStats = namedtuple('EpochStats', 'epoch learning_rate train_loss val_loss val_jac time')
     history = []
@@ -61,7 +61,7 @@ def train(model: torch.nn.Module,
 
             for batch_n, batch_data in enumerate(train_loader):
                 train_batch, labels_batch = batch_data['image'], batch_data['mask']
-                train_batch, labels_batch = train_batch.to('cuda'), labels_batch.to('cuda')
+                train_batch, labels_batch = train_batch.to(device), labels_batch.to(device)
 
                 with torch.autocast(device_type='cuda'):
                     output_batch = model(train_batch)
@@ -87,7 +87,7 @@ def train(model: torch.nn.Module,
         with torch.no_grad():
             for batch_data in val_loader:
                 val_batch, val_labels_batch = batch_data['image'], batch_data['mask']
-                val_batch, val_labels_batch = val_batch.to('cuda'), val_labels_batch.to('cuda')
+                val_batch, val_labels_batch = val_batch.to(device), val_labels_batch.to(device)
 
                 val_output_batch = model(val_batch)
                 val_loss = criterion(val_output_batch, val_labels_batch)

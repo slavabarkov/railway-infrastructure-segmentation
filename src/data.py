@@ -54,6 +54,7 @@ class SegmentationDataset(torch.utils.data.Dataset):
         """
         image_path = self.images[idx]
         image = cv2.imread(str(image_path))
+        original_height, original_width = image.shape[:2]
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = image.astype('float32')
         image /= 255.
@@ -75,6 +76,8 @@ class SegmentationDataset(torch.utils.data.Dataset):
                 result['mask'] = result['mask'].permute(2, 0, 1)
 
         result['filename'] = image_path.name
+        result['original_height'] = original_height
+        result['original_width'] = original_width
 
         return result
 

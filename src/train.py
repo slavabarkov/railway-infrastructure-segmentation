@@ -18,6 +18,27 @@ def train(model: torch.nn.Module,
           lr_scheduler: Optional[torch.optim.lr_scheduler._LRScheduler],
           filename: str,
           accumulate_every_n_epochs: int = 1) -> List[Any]:
+    """
+    Train the model and evaluate every epoch
+
+    Parameters
+    ----------
+    model (torch.nn.Module): pytorch neural network model
+    optimizer (torch.optim.Optimizer): pytorch optimizer object
+    criterion (torch.nn.Module): pytorch criterion that computes a gradient according to a given loss function
+    train_loader (torch.utils.data.DataLoader): pytorch data loading iterable over the training dataset
+    val_loader (torch.utils.data.DataLoader): pytorch data loading iterable over the validation dataset
+    epochs (int): total number of epochs
+    device (str): the device on which the tensors will be allocated
+    lr_scheduler (torch.optim.lr_scheduler._LRScheduler): learning rate scheduler
+    filename (str): string containing the filename to save the model and optimizer states to a disk file
+    accumulate_every_n_epochs (int): epochs to accumulate gradient before updating the weights
+
+    Returns
+    -------
+    history (List[EpochStats]): training history
+    """
+
     model.to(device)
     scaler = torch.cuda.amp.GradScaler()
     EpochStats = namedtuple('EpochStats', 'epoch learning_rate train_loss val_loss val_jac time')

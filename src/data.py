@@ -9,27 +9,56 @@ from sklearn.model_selection import train_test_split, KFold
 
 
 class SegmentationDataset(torch.utils.data.Dataset):
+    """
+    Class to create pytorch dataset for the segmentation task
+    """
+
     def __init__(
             self,
             images: List[Path],
             masks: Optional[List[Path]] = None,
             transforms: Optional[A.core.composition.Compose] = None
     ) -> None:
+        """
+        Create the pytorch dataset for the segmentation task
+
+        Parameters
+        ----------
+        images (List[Path]): image paths
+        masks (List[Path]): true segmentation masks
+        transforms (albumentations.Compose): albumentations transforms
+        """
         self.images = images
         self.masks = masks
         self.transforms = transforms
 
     def __len__(self) -> int:
+        """
+        Returns
+        ----------
+        length (int): dataset length
+        """
         return len(self.images)
 
     def __getitem__(self, idx: int) -> Dict[str, Any]:
+        """
+        Gets an item from the dataset by its id, creates binary masks and applies transforms
+
+        Parameters
+        ----------
+        idx (int): image id
+
+        Returns
+        ----------
+        result (dict): dictionary containing image, mask and filename
+        """
         image_path = self.images[idx]
         image = cv2.imread(str(image_path))
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = image.astype('float32')
         image /= 255.
 
-        result = {"image": image}
+        result = {'image': image}
 
         if self.masks is not None:
             mask_path = self.masks[idx]
@@ -38,14 +67,14 @@ class SegmentationDataset(torch.utils.data.Dataset):
             mask[:, :, 1] = mask[:, :, 1] == 7
             mask[:, :, 2] = mask[:, :, 2] == 10
             mask = mask.astype('float32')
-            result["mask"] = mask
+            result['mask'] = mask
 
         if self.transforms is not None:
             result = self.transforms(**result)
             if self.masks is not None:
-                result["mask"] = result["mask"].permute(2, 0, 1)
+                result['mask'] = result['mask'].permute(2, 0, 1)
 
-        result["filename"] = image_path.name
+        result['filename'] = image_path.name
 
         return result
 
@@ -62,6 +91,26 @@ def get_loaders(
         k_folds: int = 4,
         current_fold: int = 0
 ) -> Dict[str, torch.utils.data.DataLoader]:
+    """
+    Creates pytorch dataloaders for train, test and validation sets
+
+    Parameters
+    ----------
+    images (list[Path]): list of images filepaths for the datasets
+    masks (List[Path]): list of masks filepaths for the datasets
+    random_state (int): random state
+    valid_size (float): validation/test dataset ratio
+    batch_size (int): batch size
+    num_workers (int): thw number of workers
+    train_transforms_fn (albumentations.Compose): transforms to use on train dataset
+    valid_transforms_fn (albumentations.Compose): transforms to use on test dataset
+    k_folds (int): total number of folds
+    current_fold (int): fold for which to get the dataloaders
+
+    Returns
+    -------
+    loaders (dict): dictionary containing dataloders for train, test and validation
+    """
     indices = np.arange(len(images))
 
     skf = KFold(k_folds, shuffle=True, random_state=random_state)
@@ -114,6 +163,8 @@ def get_loaders(
         drop_last=False
     )
 
-    loaders = {"train": train_loader, "val": val_loader, "test": test_loader}
+    loaders = {'train': train_loader,
+               'val': val_loader,
+               'test': test_loader}
 
     return loaders

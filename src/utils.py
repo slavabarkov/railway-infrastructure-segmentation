@@ -7,6 +7,21 @@ def iou_coef(y_true: torch.Tensor,
              threshold: float = 0.5,
              dimensions: Tuple[int, int] = (2, 3),
              epsilon: float = 1e-6) -> torch.Tensor:
+    """
+    Calculate the IoU coefficient
+
+    Parameters
+    ----------
+    y_true (torch.Tensor): actual segmentation masks
+    y_pred (torch.Tensor): model predictions
+    threshold (float): threshold to convert logits to binary
+    dimensions (tuple): dimensions used to calculate the metric
+    epsilon (float): epsilon value to prevent division by zero
+
+    Returns
+    -------
+    iou (float): IoU coefficient
+    """
     y_true = y_true.to(torch.float32)
     y_pred = (y_pred > threshold).to(torch.float32)
     inter = (y_true * y_pred).sum(dim=dimensions)
@@ -28,8 +43,9 @@ class RunningAverage():
         """
         Updates running average with new value
 
-        Args:
-            n : value to add to the running average
+        Parameters
+        ----------
+        n (float): value to add to the running average
         """
         self.total += n
         self.count += 1
@@ -38,7 +54,9 @@ class RunningAverage():
         """
         Returns current running average
 
-        Returns:
-            (float): Running average
+        Returns
+        -------
+        running_avg (float): Current running average
         """
-        return self.total / (self.count + 1e-15)
+        running_avg = self.total / (self.count + 1e-15)
+        return running_avg

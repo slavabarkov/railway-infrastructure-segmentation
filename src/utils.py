@@ -1,6 +1,8 @@
 from typing import Tuple
 import torch
 
+if __name__ == '__main__':
+    pass
 
 
 class RunningAverage():

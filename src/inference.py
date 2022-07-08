@@ -3,6 +3,9 @@ import torch
 import numpy as np
 import cv2
 
+if __name__ == '__main__':
+    pass
+
 
 def get_batch_predictions(models: List[torch.nn.Module],
                           batch_data: Dict[str, Any],

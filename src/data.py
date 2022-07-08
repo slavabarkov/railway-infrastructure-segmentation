@@ -7,6 +7,9 @@ import albumentations as A
 import cv2
 from sklearn.model_selection import train_test_split, KFold
 
+if __name__ == '__main__':
+    pass
+
 
 class SegmentationDataset(torch.utils.data.Dataset):
     """
@@ -171,3 +174,42 @@ def get_loaders(
                'test': test_loader}
 
     return loaders
+
+
+def get_transforms(image_width: int = 960,
+                   image_height: int = 544,
+                   add_augmentations: bool = False) -> A.core.composition.Compose:
+    """
+    Creates albumentations transforms
+
+    Parameters
+    ----------
+    image_width (int): desired image width
+    image_height (int): desired image height
+    add_augmentations (bool): if true, returns transforms with augmentation
+
+    Returns
+    -------
+    loaders (A.Compose): albumentations transforms
+    """
+    transforms_augment_list = [
+        A.CoarseDropout(max_holes=12, max_height=256, max_width=256, min_holes=6, min_height=256, min_width=256,
+                        fill_value=0, mask_fill_value=0, p=0.5),
+        A.Perspective(scale=(0.05, 0.1), p=0.25),
+        A.HorizontalFlip(p=0.5),
+        A.RandomBrightnessContrast(brightness_limit=(-0.1, 0.1), contrast_limit=(-0.1, 0.1), p=0.5),
+        A.MultiplicativeNoise(multiplier=[0.5, 1.5], per_channel=True, p=0.25)
+    ]
+    transforms_resize_list = [
+        A.LongestMaxSize(image_width),
+        A.PadIfNeeded(image_height, image_width, border_mode=cv2.BORDER_CONSTANT, value=0),
+        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=1.0),
+        A.pytorch.ToTensorV2()
+    ]
+
+    if add_augmentations:
+        transforms = A.Compose([*transforms_augment_list, *transforms_resize_list])
+    else:
+        transforms = A.Compose(transforms_resize_list)
+
+    return transforms

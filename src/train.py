@@ -5,7 +5,10 @@ from collections import namedtuple
 import torch
 from tqdm import tqdm
 
-from utils import RunningAverage, iou_coef
+from .utils import RunningAverage, iou_coef
+
+if __name__ == '__main__':
+    pass
 
 
 def train(model: torch.nn.Module,
@@ -16,7 +19,8 @@ def train(model: torch.nn.Module,
           epochs: int,
           lr_scheduler: Optional[torch.optim.lr_scheduler._LRScheduler],
           filename: str,
-          accumulate_every_n_epochs: int = 1) -> List[Any]:
+          accumulate_every_n_epochs: int = 1,
+          clip_gradient: bool = False) -> List[Any]:
     """
     Train the model and evaluate every epoch
 
@@ -31,6 +35,7 @@ def train(model: torch.nn.Module,
     lr_scheduler (torch.optim.lr_scheduler._LRScheduler): learning rate scheduler
     filename (str): string containing the filename to save the model and optimizer states to a disk file
     accumulate_every_n_epochs (int): epochs to accumulate gradient before updating the weights
+    clip_gradient (bool): if True, will clip the gradient using gradient norm
 
     Returns
     -------
@@ -72,6 +77,8 @@ def train(model: torch.nn.Module,
                 scaler.scale(loss).backward()
 
                 if (batch_n + 1) % accumulate_every_n_epochs == 0:
+                    if clip_gradient:
+                        torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
                     scaler.step(optimizer)
                     scaler.update()
                     optimizer.zero_grad(set_to_none=True)

@@ -6,7 +6,7 @@ import cv2
 
 def get_batch_predictions(models: List[torch.nn.Module],
                           batch_data: Dict[str, Any],
-                          device: str = 'cuda') -> torch.Tensor:
+                          device: torch.device) -> torch.Tensor:
     """
     Returns the average predicted logits mask for each model in provided models list
 

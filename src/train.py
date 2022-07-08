@@ -41,12 +41,12 @@ def train(model: torch.nn.Module,
     scaler = torch.cuda.amp.GradScaler()
     EpochStats = namedtuple('EpochStats', 'epoch learning_rate train_loss val_loss val_jac time')
     history = []
+    best_val_jac = 0.0
 
     for e in range(epochs):
         loss_avg = RunningAverage()
         val_jac_avg = RunningAverage()
         val_loss_avg = RunningAverage()
-        best_val_jac = 0.0
 
         torch.cuda.empty_cache()
         gc.collect()

@@ -8,7 +8,7 @@ if __name__ == '__main__':
 
 
 def get_batch_predictions(models: List[torch.nn.Module],
-                          batch_data: Dict[str, Any],
+                          test_batch: torch.Tensor,
                           device: torch.device) -> torch.Tensor:
     """
     Returns the average predicted logits mask for each model in provided models list
@@ -16,27 +16,30 @@ def get_batch_predictions(models: List[torch.nn.Module],
     Parameters
     ----------
     models (List[torch.nn.Module]): list of loaded pytorch models
-    batch_data (dict): current batch data, expects batches of size 1
+    test_batch (torch.Tensor): images batch to get predictions for
     device (str): device for pytorch tensors
 
     Returns
     -------
     test_output_batch (torch.Tensor): averaged predicted logits mask
     """
-    test_batch = batch_data['image']
+    for model in models:
+        model.eval()
+        model.to(device)
+
     test_batch = test_batch.to(device)
     test_output_batch = None
 
-    for model in models:
-        model.eval()
-        with torch.inference_mode():
+    with torch.inference_mode():
+        for model in models:
             if test_output_batch is None:
                 test_output_batch = model(test_batch)
             else:
                 test_output_batch += model(test_batch)
-                test_output_batch /= 2
 
+        test_output_batch /= len(models)
         test_output_batch = torch.nn.Sigmoid()(test_output_batch)
+
     return test_output_batch
 
 
@@ -58,7 +61,7 @@ def upscale_mask(mask: np.array, desired_height: int, desired_width: int) -> np.
 
     ratio = desired_width / desired_height
     image_width_after_maxsize = image_width
-    image_height_after_maxsize = round(image_width_after_maxsize * ratio)
+    image_height_after_maxsize = round(image_width_after_maxsize / ratio)
 
     pad_top = int((image_height - image_height_after_maxsize) / 2.0)
     pad_bottom = image_height - image_height_after_maxsize - pad_top

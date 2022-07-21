@@ -5,7 +5,7 @@ if __name__ == '__main__':
     pass
 
 
-class RunningAverage():
+class RunningAverage:
     """
     Class to save and update the running average
     """

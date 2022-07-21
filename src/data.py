@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 import torch
 import albumentations as A
+import albumentations.pytorch
 import cv2
 from sklearn.model_selection import train_test_split, KFold
 
@@ -115,7 +116,7 @@ def get_loaders(
 
     Returns
     -------
-    loaders (dict): dictionary containing dataloders for train, test and validation
+    loaders (dict): dictionary containing dataloaders for train, test and validation
     """
     indices = np.arange(len(images))
 
@@ -198,7 +199,7 @@ def get_transforms(image_width: int = 960,
         A.Perspective(scale=(0.05, 0.1), p=0.25),
         A.HorizontalFlip(p=0.5),
         A.RandomBrightnessContrast(brightness_limit=(-0.1, 0.1), contrast_limit=(-0.1, 0.1), p=0.5),
-        A.MultiplicativeNoise(multiplier=[0.5, 1.5], per_channel=True, p=0.25)
+        A.MultiplicativeNoise(multiplier=(0.5, 1.5), per_channel=True, p=0.25)
     ]
     transforms_resize_list = [
         A.LongestMaxSize(image_width),

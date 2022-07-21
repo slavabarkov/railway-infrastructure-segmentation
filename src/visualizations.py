@@ -8,7 +8,7 @@ if __name__ == '__main__':
 
 def visualize_augmentations(image_path: str,
                             mask_path: str,
-                            transforms: A.core.composition.Compose) -> np.array:
+                            transforms: A.core.composition.Compose) -> np.ndarray:
     """
     Applies the specified augmentation to images and masks and returns the visualization
 
@@ -20,7 +20,7 @@ def visualize_augmentations(image_path: str,
 
     Returns
     -------
-    blend (np.array): Image with mask and applied augmentations
+    blend (np.ndarray): Image with mask and applied augmentations
     """
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

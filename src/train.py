@@ -1,4 +1,4 @@
-from typing import Optional, List, Any
+from typing import Optional, List
 import sys
 import gc
 from collections import namedtuple
@@ -10,8 +10,10 @@ from .utils import RunningAverage, iou_coef
 if __name__ == '__main__':
     pass
 
+EpochStats = namedtuple('EpochStats', 'epoch learning_rate train_loss val_loss val_jac time')
 
-def train(model: torch.nn.Module,
+
+def train(model: torch.nn.Module,  # type: ignore
           optimizer: torch.optim.Optimizer,
           criterion: torch.nn.Module,
           train_loader: torch.utils.data.DataLoader,
@@ -20,7 +22,7 @@ def train(model: torch.nn.Module,
           lr_scheduler: Optional[torch.optim.lr_scheduler._LRScheduler],
           filename: str,
           accumulate_every_n_epochs: int = 1,
-          clip_gradient: bool = False) -> List[Any]:
+          clip_gradient: bool = False) -> List[EpochStats]:
     """
     Train the model and evaluate every epoch
 
@@ -44,7 +46,6 @@ def train(model: torch.nn.Module,
     device = torch.device('cuda')
     model.to(device)
     scaler = torch.cuda.amp.GradScaler()
-    EpochStats = namedtuple('EpochStats', 'epoch learning_rate train_loss val_loss val_jac time')
     history = []
     best_val_jac = 0.0
 

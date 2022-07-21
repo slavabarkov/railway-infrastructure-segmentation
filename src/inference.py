@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List
 import torch
 import numpy as np
 import cv2
@@ -43,13 +43,13 @@ def get_batch_predictions(models: List[torch.nn.Module],
     return test_output_batch
 
 
-def upscale_mask(mask: np.array, desired_height: int, desired_width: int) -> np.array:
+def upscale_mask(mask: np.ndarray, desired_height: int, desired_width: int) -> np.ndarray:
     """
     Reverses image size augmentations and returns upscaled mask with desired resolution
 
     Parameters
     ----------
-    mask (np.array): boolean segmentation mask
+    mask (np.ndarray): boolean segmentation mask
     desired_height (int): desired image height
     desired_width (int): desired image width
 
@@ -72,18 +72,18 @@ def upscale_mask(mask: np.array, desired_height: int, desired_width: int) -> np.
     return mask
 
 
-def convert_bool_mask_to_submission(mask: np.array, threshold: float = 0.5) -> np.array:
+def convert_bool_mask_to_submission(mask: np.ndarray, threshold: float = 0.5) -> np.ndarray:
     """
     Converts the boolean mask to format required for submission
 
     Parameters
     ----------
-    mask (np.array): boolean segmentation mask
+    mask (np.ndarray): boolean segmentation mask
     threshold (float): threshold to convert logits to binary
 
     Returns
     -------
-    output_mask (np.array): segmentation mask in format required for submission
+    output_mask (np.ndarray): segmentation mask in format required for submission
     """
     class_6_bool_mask = mask[:, :, 0] > threshold
     class_7_bool_mask = mask[:, :, 1] > threshold

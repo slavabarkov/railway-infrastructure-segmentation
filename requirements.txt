@@ -3,7 +3,7 @@ timm==0.4.12
 albumentations==1.2.0
 opencv-contrib-python==4.6.0.66
 torch>=1.11.0
-numpy==1.21.6
+numpy==1.22.0
 scikit-learn==1.0.2
 matplotlib==3.2.2
 tqdm==4.64.0
